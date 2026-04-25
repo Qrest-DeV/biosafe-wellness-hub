@@ -92,7 +92,7 @@ const Services = () => {
             <div>
               <div className="font-semibold text-teal">{active.name}</div>
               <div className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> online · typically replies instantly
+                <span className="h-1.5 w-1.5 rounded-full bg-mint" /> online · typically replies instantly
               </div>
             </div>
           </div>
