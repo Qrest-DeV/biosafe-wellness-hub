@@ -9,6 +9,9 @@ export type Product = {
   category: string;
   description: string;
   badge?: string;
+  benefits?: string[];
+  howItWorks?: string;
+  usage?: string;
 };
 
 type CartItem = Product & { qty: number };
