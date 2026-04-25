@@ -1,95 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* BioLife24 — Warm, human, lifestyle-led healthcare design system.
+   All colors HSL. Tokens only — never inline hex in components. */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Brand palette */
+    --base: 45 13% 96%;            /* #F6F5F3 light neutral */
+    --peach: 22 90% 92%;           /* #FDE6D7 soft peach */
+    --mint: 165 100% 90%;          /* #CAFFF2 mint */
+    --terracotta: 19 88% 61%;      /* #F37543 */
+    --terracotta-deep: 19 78% 52%;
+    --teal: 190 70% 16%;           /* #0C3D45 */
+    --teal-soft: 190 35% 28%;
+    --charcoal: 210 10% 15%;
+
+    /* Semantic mapping */
+    --background: 45 13% 96%;
+    --foreground: 210 10% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 210 10% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 210 10% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 19 88% 61%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 22 90% 92%;
+    --secondary-foreground: 190 70% 16%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 45 10% 92%;
+    --muted-foreground: 210 8% 40%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 165 100% 90%;
+    --accent-foreground: 190 70% 16%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
+    --ring: 19 88% 61%;
 
-    --radius: 0.5rem;
+    --radius: 1.25rem;
+
+    /* Gradients */
+    --gradient-warm: linear-gradient(135deg, hsl(var(--peach)) 0%, hsl(45 30% 96%) 100%);
+    --gradient-mint: linear-gradient(135deg, hsl(var(--mint)) 0%, hsl(165 60% 96%) 100%);
+    --gradient-teal: linear-gradient(160deg, hsl(var(--teal)) 0%, hsl(var(--teal-soft)) 100%);
+
+    /* Shadows */
+    --shadow-soft: 0 6px 24px -10px hsl(190 50% 20% / 0.12);
+    --shadow-warm: 0 20px 50px -20px hsl(19 88% 61% / 0.35);
+    --shadow-card: 0 2px 14px -6px hsl(190 30% 20% / 0.08);
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
@@ -98,8 +75,47 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
+  h1, h2, h3, h4 {
+    @apply text-teal font-semibold tracking-tight;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  .container-x { @apply max-w-7xl mx-auto px-5 sm:px-8; }
+  .pill { @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium; }
+  .card-soft {
+    @apply bg-card rounded-3xl;
+    box-shadow: var(--shadow-card);
+  }
+}
+
+@layer utilities {
+  .text-teal { color: hsl(var(--teal)); }
+  .bg-teal { background-color: hsl(var(--teal)); }
+  .bg-peach { background-color: hsl(var(--peach)); }
+  .bg-mint { background-color: hsl(var(--mint)); }
+  .bg-base { background-color: hsl(var(--base)); }
+  .bg-terracotta { background-color: hsl(var(--terracotta)); }
+  .text-terracotta { color: hsl(var(--terracotta)); }
+  .border-teal { border-color: hsl(var(--teal)); }
+  .gradient-warm { background: var(--gradient-warm); }
+  .gradient-mint { background: var(--gradient-mint); }
+  .gradient-teal { background: var(--gradient-teal); }
+  .shadow-soft { box-shadow: var(--shadow-soft); }
+  .shadow-warm { box-shadow: var(--shadow-warm); }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: none; }
+  }
+  .animate-fade-up { animation: fade-up 0.7s ease both; }
 }
