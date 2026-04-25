@@ -114,6 +114,49 @@ const ProductDetail = () => {
             </div>
           </div>
         </div>
+
+        <div className="mt-14 md:mt-20 grid md:grid-cols-3 gap-5 md:gap-6">
+          {product.benefits && product.benefits.length > 0 && (
+            <div className="card-soft p-6 md:p-7 md:col-span-2">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="h-4 w-4 text-terracotta" />
+                <span className="text-[11px] uppercase tracking-widest text-muted-foreground">Key benefits</span>
+              </div>
+              <h3 className="text-xl md:text-2xl text-teal mb-5">Why you'll love it</h3>
+              <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
+                {product.benefits.map((b) => (
+                  <li key={b} className="flex items-start gap-2.5 text-sm text-teal/80 leading-relaxed">
+                    <span className="mt-0.5 h-5 w-5 rounded-full bg-mint flex items-center justify-center shrink-0">
+                      <Check className="h-3 w-3 text-teal" />
+                    </span>
+                    {b}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {product.usage && (
+            <div className="card-soft p-6 md:p-7 bg-peach/60">
+              <div className="flex items-center gap-2 mb-4">
+                <Clock className="h-4 w-4 text-terracotta" />
+                <span className="text-[11px] uppercase tracking-widest text-muted-foreground">How to use</span>
+              </div>
+              <p className="text-sm text-teal/80 leading-relaxed">{product.usage}</p>
+            </div>
+          )}
+
+          {product.howItWorks && (
+            <div className="card-soft p-6 md:p-7 md:col-span-3 bg-gradient-to-br from-card to-peach/40">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="pill bg-teal text-peach">How it works</span>
+              </div>
+              <p className="text-base md:text-lg text-teal/85 leading-relaxed max-w-3xl">
+                {product.howItWorks}
+              </p>
+            </div>
+          )}
+        </div>
       </section>
 
       {related.length > 0 && (
