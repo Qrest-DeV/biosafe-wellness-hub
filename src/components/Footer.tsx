@@ -8,7 +8,7 @@ export const Footer = () => (
       <div>
         <Wordmark className="text-peach text-3xl" />
         <p className="mt-5 text-sm text-peach/70 max-w-xs">
-          More than prescriptions. Your wellbeing, around the clock.
+          More than prescriptions. Complete wellness.
         </p>
         <div className="flex gap-3 mt-6">
           {[Instagram, Twitter, Facebook].map((Icon, i) => (
