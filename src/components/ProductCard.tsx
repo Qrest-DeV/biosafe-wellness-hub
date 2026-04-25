@@ -6,7 +6,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
   const { add } = useCart();
   return (
     <div className="group card-soft overflow-hidden flex flex-col">
-      <Link to={`/shop?cat=${product.category}`} className="relative aspect-square bg-peach overflow-hidden">
+      <Link to={`/product/${product.id}`} className="relative aspect-square bg-peach overflow-hidden">
         <img
           src={product.image}
           alt={product.name}
@@ -19,7 +19,9 @@ export const ProductCard = ({ product }: { product: Product }) => {
       </Link>
       <div className="p-5 flex flex-col flex-1">
         <span className="text-[11px] uppercase tracking-widest text-muted-foreground">{product.category}</span>
-        <h3 className="mt-1 text-base font-semibold text-teal leading-snug">{product.name}</h3>
+        <Link to={`/product/${product.id}`} className="mt-1 text-base font-semibold text-teal leading-snug hover:text-terracotta transition-colors">
+          {product.name}
+        </Link>
         <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{product.description}</p>
         <div className="mt-4 flex items-center justify-between">
           <span className="text-lg font-semibold text-teal">{formatNaira(product.price)}</span>
