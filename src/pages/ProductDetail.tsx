@@ -4,7 +4,7 @@ import { products, categories } from "@/data/catalog";
 import { formatNaira, useCart } from "@/context/CartContext";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { ChevronLeft, Minus, Plus, ShieldCheck, Truck, RotateCcw } from "lucide-react";
+import { ChevronLeft, Minus, Plus, ShieldCheck, Truck, RotateCcw, Check, Sparkles, Clock } from "lucide-react";
 
 const ProductDetail = () => {
   const { id } = useParams();
