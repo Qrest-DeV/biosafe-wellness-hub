@@ -45,7 +45,7 @@ const Services = () => {
     <Layout>
       <section className="bg-base">
         <div className="container-x py-12 md:py-16">
-          <span className="pill bg-mint text-teal mb-4">Talk to a Pro</span>
+          <span className="pill bg-mint text-teal mb-4">Telehealth</span>
           <h1 className="text-4xl md:text-5xl max-w-2xl">Real care, in real time.</h1>
           <p className="mt-3 text-muted-foreground max-w-xl">Chat with a licensed BioLife24 professional, or message us on WhatsApp.</p>
         </div>
