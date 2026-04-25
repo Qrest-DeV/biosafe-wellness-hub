@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 const links = [
   { to: "/shop", label: "Shop" },
   { to: "/subscriptions", label: "Subscriptions" },
-  { to: "/services", label: "Talk to a Pro" },
+  { to: "/services", label: "Telehealth" },
   { to: "/aesthetics", label: "Aesthetics" },
 ];
 

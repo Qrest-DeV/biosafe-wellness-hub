@@ -74,7 +74,7 @@ export const HeroCarousel = () => {
                           : "border-teal/30 text-teal hover:bg-teal hover:text-peach"
                       }`}
                     >
-                      Talk to a Pro
+                      Telehealth
                     </Link>
                   </div>
                 </div>
