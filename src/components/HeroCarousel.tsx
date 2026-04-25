@@ -9,7 +9,7 @@ const slides = [
   {
     image: hero1,
     eyebrow: "Pharmacy · 24/7",
-    title: "More than prescriptions. Your wellbeing.",
+    title: "More than prescriptions. Complete wellness.",
     body: "Order medicines, talk to a pharmacist, and get same-day delivery across Lagos.",
     cta: { label: "Shop pharmacy", to: "/shop?cat=drugs" },
     tone: "peach",
