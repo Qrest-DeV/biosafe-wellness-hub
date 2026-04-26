@@ -1,7 +1,8 @@
-import { Link, NavLink, useLocation } from "react-router-dom";
-import { Search, ShoppingBag, Menu, X } from "lucide-react";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Search, ShoppingBag, Menu, X, User } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { Wordmark } from "./Wordmark";
 import { Button } from "@/components/ui/button";
 
@@ -10,10 +11,13 @@ const links = [
   { to: "/subscriptions", label: "Subscriptions" },
   { to: "/services", label: "Telehealth" },
   { to: "/aesthetics", label: "Aesthetics" },
+  { to: "/dashboard", label: "Account" },
 ];
 
 export const Header = () => {
   const { count } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const loc = useLocation();
   const isHome = loc.pathname === "/";
@@ -40,6 +44,13 @@ export const Header = () => {
         <div className="flex items-center gap-2">
           <button aria-label="Search" className="hidden sm:flex h-10 w-10 items-center justify-center rounded-full hover:bg-peach text-teal transition">
             <Search className="h-[18px] w-[18px]" />
+          </button>
+          <button
+            onClick={() => navigate(user ? "/dashboard" : "/auth")}
+            aria-label={user ? "Account" : "Sign in"}
+            className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-peach text-teal transition"
+          >
+            <User className="h-[18px] w-[18px]" />
           </button>
           <Link to="/cart" className="relative h-10 w-10 flex items-center justify-center rounded-full hover:bg-peach text-teal transition" aria-label="Cart">
             <ShoppingBag className="h-[18px] w-[18px]" />
