@@ -13,10 +13,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
 import {
   ArrowLeft, BadgeCheck, Droplet, Calendar, Weight, Ruler, Phone,
-  Pill, FlaskConical, Stethoscope, Plus, Upload, Loader2, X, MessageCircleHeart, LogOut, Crown, Sparkles
+  Pill, FlaskConical, Stethoscope, Plus, Upload, Loader2, X, MessageCircleHeart, LogOut, Crown, Sparkles,
+  Download, Trash2, FileText, FileImage, AlertCircle
 } from "lucide-react";
+
+const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB
+const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+const formatBytes = (b: number) => b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(1)} MB`;
 
 type Profile = {
   id: string;
@@ -77,7 +83,32 @@ const Dashboard = () => {
   const [labOpen, setLabOpen] = useState(false);
   const [consultOpen, setConsultOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const validateFile = (file: File): string | null => {
+    if (!ACCEPTED_TYPES.includes(file.type)) return "Only PDF, JPG, PNG or WEBP files are allowed.";
+    if (file.size > MAX_FILE_BYTES) return `File is too large (${formatBytes(file.size)}). Max 10 MB.`;
+    return null;
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFileError(null);
+    if (!file) { setSelectedFile(null); return; }
+    const err = validateFile(file);
+    if (err) { setFileError(err); setSelectedFile(null); if (fileRef.current) fileRef.current.value = ""; return; }
+    setSelectedFile(file);
+  };
+
+  const resetLabForm = () => {
+    setSelectedFile(null);
+    setFileError(null);
+    setUploadProgress(0);
+    if (fileRef.current) fileRef.current.value = "";
+  };
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth", { replace: true });
@@ -173,16 +204,28 @@ const Dashboard = () => {
     e.preventDefault();
     if (!user) return;
     const fd = new FormData(e.currentTarget);
-    const file = fileRef.current?.files?.[0];
+    const file = selectedFile;
     let file_path: string | null = null;
     setUploading(true);
+    setUploadProgress(0);
     if (file) {
+      const err = validateFile(file);
+      if (err) { setUploading(false); setFileError(err); return; }
+      // Simulated progress (Supabase JS SDK doesn't expose upload progress events)
+      const progressTimer = setInterval(() => {
+        setUploadProgress(p => (p < 90 ? p + 10 : p));
+      }, 150);
       const path = `${user.id}/${Date.now()}-${file.name}`;
-      const { error: upErr } = await supabase.storage.from("medical-files").upload(path, file);
+      const { error: upErr } = await supabase.storage
+        .from("medical-files")
+        .upload(path, file, { contentType: file.type, upsert: false });
+      clearInterval(progressTimer);
       if (upErr) {
         setUploading(false);
+        setUploadProgress(0);
         return toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
       }
+      setUploadProgress(100);
       file_path = path;
     }
     const { data, error } = await supabase.from("lab_results").insert({
@@ -196,16 +239,32 @@ const Dashboard = () => {
     if (error) return toast({ title: "Failed to add", description: error.message, variant: "destructive" });
     setLabs([data as LabResult, ...labs]);
     setLabOpen(false);
+    resetLabForm();
     toast({ title: "Lab result saved" });
   };
   const deleteLab = async (id: string, file_path: string | null) => {
     if (file_path) await supabase.storage.from("medical-files").remove([file_path]);
     await supabase.from("lab_results").delete().eq("id", id);
     setLabs(labs.filter(l => l.id !== id));
+    toast({ title: "Lab result deleted" });
   };
   const openLabFile = async (file_path: string) => {
-    const { data } = await supabase.storage.from("medical-files").createSignedUrl(file_path, 60);
-    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+    const { data, error } = await supabase.storage.from("medical-files").createSignedUrl(file_path, 60);
+    if (error || !data?.signedUrl) return toast({ title: "Could not open file", variant: "destructive" });
+    window.open(data.signedUrl, "_blank");
+  };
+  const downloadLabFile = async (file_path: string, title: string) => {
+    const { data, error } = await supabase.storage.from("medical-files").download(file_path);
+    if (error || !data) return toast({ title: "Download failed", description: error?.message, variant: "destructive" });
+    const url = URL.createObjectURL(data);
+    const a = document.createElement("a");
+    a.href = url;
+    const ext = file_path.split(".").pop() || "";
+    a.download = `${title}${ext ? "." + ext : ""}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   };
 
   const addConsult = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -408,21 +467,41 @@ const Dashboard = () => {
                 <EmptyState icon={<FlaskConical className="h-8 w-8" />} text="Your lab results will appear here once you upload your first report." />
               ) : (
                 <ul className="space-y-3">
-                  {labs.map(l => (
-                    <li key={l.id} className="rounded-xl border border-border p-4 flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-teal truncate">{l.title}</p>
-                        {l.result_date && <p className="text-xs text-muted-foreground">{new Date(l.result_date).toLocaleDateString()}</p>}
-                        {l.notes && <p className="text-sm text-muted-foreground mt-1">{l.notes}</p>}
-                        {l.file_path && (
-                          <Button size="sm" variant="link" className="px-0 h-auto text-terracotta" onClick={() => openLabFile(l.file_path!)}>
-                            View attachment
+                  {labs.map(l => {
+                    const isPdf = l.file_path?.toLowerCase().endsWith(".pdf");
+                    const FileIcon = isPdf ? FileText : FileImage;
+                    return (
+                      <li key={l.id} className="rounded-xl border border-border p-4 flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex items-start gap-3 flex-1">
+                          {l.file_path && (
+                            <div className="h-10 w-10 rounded-lg bg-peach text-teal flex items-center justify-center shrink-0">
+                              <FileIcon className="h-5 w-5" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="font-semibold text-teal truncate">{l.title}</p>
+                            {l.result_date && <p className="text-xs text-muted-foreground">{new Date(l.result_date).toLocaleDateString()}</p>}
+                            {l.notes && <p className="text-sm text-muted-foreground mt-1">{l.notes}</p>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {l.file_path && (
+                            <>
+                              <Button size="icon" variant="ghost" title="View" onClick={() => openLabFile(l.file_path!)}>
+                                <Upload className="h-4 w-4 rotate-180" />
+                              </Button>
+                              <Button size="icon" variant="ghost" title="Download" onClick={() => downloadLabFile(l.file_path!, l.title)}>
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                          <Button size="icon" variant="ghost" title="Delete" onClick={() => deleteLab(l.id, l.file_path)}>
+                            <Trash2 className="h-4 w-4 text-terracotta" />
                           </Button>
-                        )}
-                      </div>
-                      <Button size="icon" variant="ghost" onClick={() => deleteLab(l.id, l.file_path)}><X className="h-4 w-4" /></Button>
-                    </li>
-                  ))}
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </TabsContent>
@@ -502,19 +581,38 @@ const Dashboard = () => {
       </Dialog>
 
       {/* Add Lab */}
-      <Dialog open={labOpen} onOpenChange={setLabOpen}>
+      <Dialog open={labOpen} onOpenChange={(o) => { setLabOpen(o); if (!o) resetLabForm(); }}>
         <DialogContent>
           <DialogHeader><DialogTitle>Upload lab result</DialogTitle></DialogHeader>
           <form onSubmit={addLab} className="space-y-3">
             <Field label="Title" name="title" required placeholder="Full Blood Count" />
             <Field label="Result date" name="result_date" type="date" />
             <div className="space-y-1.5">
-              <Label>Attachment (PDF or image)</Label>
-              <Input ref={fileRef} type="file" accept="application/pdf,image/*" />
+              <Label htmlFor="lab-file">Attachment (PDF, JPG, PNG, WEBP · max 10 MB)</Label>
+              <Input id="lab-file" ref={fileRef} type="file" accept="application/pdf,image/jpeg,image/png,image/webp" onChange={handleFileChange} />
+              {selectedFile && !fileError && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground rounded-md bg-muted/40 px-3 py-2">
+                  {selectedFile.type === "application/pdf" ? <FileText className="h-4 w-4 text-teal" /> : <FileImage className="h-4 w-4 text-teal" />}
+                  <span className="truncate flex-1">{selectedFile.name}</span>
+                  <span className="text-xs shrink-0">{formatBytes(selectedFile.size)}</span>
+                </div>
+              )}
+              {fileError && (
+                <div className="flex items-start gap-2 text-sm text-terracotta rounded-md bg-terracotta/10 px-3 py-2">
+                  <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                  <span>{fileError}</span>
+                </div>
+              )}
+              {uploading && selectedFile && (
+                <div className="space-y-1">
+                  <Progress value={uploadProgress} className="h-2" />
+                  <p className="text-xs text-muted-foreground text-right">{uploadProgress}%</p>
+                </div>
+              )}
             </div>
             <div className="space-y-1.5"><Label>Notes</Label><Textarea name="notes" /></div>
             <DialogFooter>
-              <Button type="submit" disabled={uploading} className="rounded-full bg-terracotta hover:bg-terracotta/90 text-primary-foreground gap-2">
+              <Button type="submit" disabled={uploading || !!fileError} className="rounded-full bg-terracotta hover:bg-terracotta/90 text-primary-foreground gap-2">
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} Save
               </Button>
             </DialogFooter>
