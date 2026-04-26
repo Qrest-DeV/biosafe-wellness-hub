@@ -13,10 +13,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
 import {
   ArrowLeft, BadgeCheck, Droplet, Calendar, Weight, Ruler, Phone,
-  Pill, FlaskConical, Stethoscope, Plus, Upload, Loader2, X, MessageCircleHeart, LogOut, Crown, Sparkles
+  Pill, FlaskConical, Stethoscope, Plus, Upload, Loader2, X, MessageCircleHeart, LogOut, Crown, Sparkles,
+  Download, Trash2, FileText, FileImage, AlertCircle
 } from "lucide-react";
+
+const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB
+const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+const formatBytes = (b: number) => b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(1)} MB`;
 
 type Profile = {
   id: string;
