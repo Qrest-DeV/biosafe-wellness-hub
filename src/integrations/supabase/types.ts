@@ -14,7 +14,171 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      consultations: {
+        Row: {
+          consultation_date: string
+          created_at: string
+          doctor_name: string | null
+          id: string
+          specialty: string | null
+          summary: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          consultation_date?: string
+          created_at?: string
+          doctor_name?: string | null
+          id?: string
+          specialty?: string | null
+          summary?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          consultation_date?: string
+          created_at?: string
+          doctor_name?: string | null
+          id?: string
+          specialty?: string | null
+          summary?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lab_results: {
+        Row: {
+          created_at: string
+          file_path: string | null
+          id: string
+          notes: string | null
+          result_date: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          notes?: string | null
+          result_date?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          notes?: string | null
+          result_date?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      prescriptions: {
+        Row: {
+          active: boolean
+          created_at: string
+          dosage: string | null
+          frequency: string | null
+          id: string
+          name: string
+          notes: string | null
+          refill_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          dosage?: string | null
+          frequency?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          refill_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          dosage?: string | null
+          frequency?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          refill_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          age: number | null
+          allergies: string[]
+          avatar_url: string | null
+          blood_type: string | null
+          chronic_conditions: string[]
+          created_at: string
+          full_name: string | null
+          height_cm: number | null
+          id: string
+          phone: string | null
+          subscription_plan: Database["public"]["Enums"]["subscription_plan"]
+          subscription_started_at: string | null
+          updated_at: string
+          user_id: string
+          username: string | null
+          verified_patient: boolean
+          weight_kg: number | null
+        }
+        Insert: {
+          age?: number | null
+          allergies?: string[]
+          avatar_url?: string | null
+          blood_type?: string | null
+          chronic_conditions?: string[]
+          created_at?: string
+          full_name?: string | null
+          height_cm?: number | null
+          id?: string
+          phone?: string | null
+          subscription_plan?: Database["public"]["Enums"]["subscription_plan"]
+          subscription_started_at?: string | null
+          updated_at?: string
+          user_id: string
+          username?: string | null
+          verified_patient?: boolean
+          weight_kg?: number | null
+        }
+        Update: {
+          age?: number | null
+          allergies?: string[]
+          avatar_url?: string | null
+          blood_type?: string | null
+          chronic_conditions?: string[]
+          created_at?: string
+          full_name?: string | null
+          height_cm?: number | null
+          id?: string
+          phone?: string | null
+          subscription_plan?: Database["public"]["Enums"]["subscription_plan"]
+          subscription_started_at?: string | null
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+          verified_patient?: boolean
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +187,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      subscription_plan: "none" | "essential" | "family"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +314,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      subscription_plan: ["none", "essential", "family"],
+    },
   },
 } as const
