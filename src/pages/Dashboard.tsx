@@ -581,19 +581,38 @@ const Dashboard = () => {
       </Dialog>
 
       {/* Add Lab */}
-      <Dialog open={labOpen} onOpenChange={setLabOpen}>
+      <Dialog open={labOpen} onOpenChange={(o) => { setLabOpen(o); if (!o) resetLabForm(); }}>
         <DialogContent>
           <DialogHeader><DialogTitle>Upload lab result</DialogTitle></DialogHeader>
           <form onSubmit={addLab} className="space-y-3">
             <Field label="Title" name="title" required placeholder="Full Blood Count" />
             <Field label="Result date" name="result_date" type="date" />
             <div className="space-y-1.5">
-              <Label>Attachment (PDF or image)</Label>
-              <Input ref={fileRef} type="file" accept="application/pdf,image/*" />
+              <Label htmlFor="lab-file">Attachment (PDF, JPG, PNG, WEBP · max 10 MB)</Label>
+              <Input id="lab-file" ref={fileRef} type="file" accept="application/pdf,image/jpeg,image/png,image/webp" onChange={handleFileChange} />
+              {selectedFile && !fileError && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground rounded-md bg-muted/40 px-3 py-2">
+                  {selectedFile.type === "application/pdf" ? <FileText className="h-4 w-4 text-teal" /> : <FileImage className="h-4 w-4 text-teal" />}
+                  <span className="truncate flex-1">{selectedFile.name}</span>
+                  <span className="text-xs shrink-0">{formatBytes(selectedFile.size)}</span>
+                </div>
+              )}
+              {fileError && (
+                <div className="flex items-start gap-2 text-sm text-terracotta rounded-md bg-terracotta/10 px-3 py-2">
+                  <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                  <span>{fileError}</span>
+                </div>
+              )}
+              {uploading && selectedFile && (
+                <div className="space-y-1">
+                  <Progress value={uploadProgress} className="h-2" />
+                  <p className="text-xs text-muted-foreground text-right">{uploadProgress}%</p>
+                </div>
+              )}
             </div>
             <div className="space-y-1.5"><Label>Notes</Label><Textarea name="notes" /></div>
             <DialogFooter>
-              <Button type="submit" disabled={uploading} className="rounded-full bg-terracotta hover:bg-terracotta/90 text-primary-foreground gap-2">
+              <Button type="submit" disabled={uploading || !!fileError} className="rounded-full bg-terracotta hover:bg-terracotta/90 text-primary-foreground gap-2">
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} Save
               </Button>
             </DialogFooter>
