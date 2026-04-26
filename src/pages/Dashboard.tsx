@@ -467,21 +467,41 @@ const Dashboard = () => {
                 <EmptyState icon={<FlaskConical className="h-8 w-8" />} text="Your lab results will appear here once you upload your first report." />
               ) : (
                 <ul className="space-y-3">
-                  {labs.map(l => (
-                    <li key={l.id} className="rounded-xl border border-border p-4 flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-teal truncate">{l.title}</p>
-                        {l.result_date && <p className="text-xs text-muted-foreground">{new Date(l.result_date).toLocaleDateString()}</p>}
-                        {l.notes && <p className="text-sm text-muted-foreground mt-1">{l.notes}</p>}
-                        {l.file_path && (
-                          <Button size="sm" variant="link" className="px-0 h-auto text-terracotta" onClick={() => openLabFile(l.file_path!)}>
-                            View attachment
+                  {labs.map(l => {
+                    const isPdf = l.file_path?.toLowerCase().endsWith(".pdf");
+                    const FileIcon = isPdf ? FileText : FileImage;
+                    return (
+                      <li key={l.id} className="rounded-xl border border-border p-4 flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex items-start gap-3 flex-1">
+                          {l.file_path && (
+                            <div className="h-10 w-10 rounded-lg bg-peach text-teal flex items-center justify-center shrink-0">
+                              <FileIcon className="h-5 w-5" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="font-semibold text-teal truncate">{l.title}</p>
+                            {l.result_date && <p className="text-xs text-muted-foreground">{new Date(l.result_date).toLocaleDateString()}</p>}
+                            {l.notes && <p className="text-sm text-muted-foreground mt-1">{l.notes}</p>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {l.file_path && (
+                            <>
+                              <Button size="icon" variant="ghost" title="View" onClick={() => openLabFile(l.file_path!)}>
+                                <Upload className="h-4 w-4 rotate-180" />
+                              </Button>
+                              <Button size="icon" variant="ghost" title="Download" onClick={() => downloadLabFile(l.file_path!, l.title)}>
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                          <Button size="icon" variant="ghost" title="Delete" onClick={() => deleteLab(l.id, l.file_path)}>
+                            <Trash2 className="h-4 w-4 text-terracotta" />
                           </Button>
-                        )}
-                      </div>
-                      <Button size="icon" variant="ghost" onClick={() => deleteLab(l.id, l.file_path)}><X className="h-4 w-4" /></Button>
-                    </li>
-                  ))}
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </TabsContent>
