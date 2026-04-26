@@ -83,7 +83,32 @@ const Dashboard = () => {
   const [labOpen, setLabOpen] = useState(false);
   const [consultOpen, setConsultOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const validateFile = (file: File): string | null => {
+    if (!ACCEPTED_TYPES.includes(file.type)) return "Only PDF, JPG, PNG or WEBP files are allowed.";
+    if (file.size > MAX_FILE_BYTES) return `File is too large (${formatBytes(file.size)}). Max 10 MB.`;
+    return null;
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFileError(null);
+    if (!file) { setSelectedFile(null); return; }
+    const err = validateFile(file);
+    if (err) { setFileError(err); setSelectedFile(null); if (fileRef.current) fileRef.current.value = ""; return; }
+    setSelectedFile(file);
+  };
+
+  const resetLabForm = () => {
+    setSelectedFile(null);
+    setFileError(null);
+    setUploadProgress(0);
+    if (fileRef.current) fileRef.current.value = "";
+  };
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth", { replace: true });
