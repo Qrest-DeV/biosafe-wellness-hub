@@ -204,16 +204,28 @@ const Dashboard = () => {
     e.preventDefault();
     if (!user) return;
     const fd = new FormData(e.currentTarget);
-    const file = fileRef.current?.files?.[0];
+    const file = selectedFile;
     let file_path: string | null = null;
     setUploading(true);
+    setUploadProgress(0);
     if (file) {
+      const err = validateFile(file);
+      if (err) { setUploading(false); setFileError(err); return; }
+      // Simulated progress (Supabase JS SDK doesn't expose upload progress events)
+      const progressTimer = setInterval(() => {
+        setUploadProgress(p => (p < 90 ? p + 10 : p));
+      }, 150);
       const path = `${user.id}/${Date.now()}-${file.name}`;
-      const { error: upErr } = await supabase.storage.from("medical-files").upload(path, file);
+      const { error: upErr } = await supabase.storage
+        .from("medical-files")
+        .upload(path, file, { contentType: file.type, upsert: false });
+      clearInterval(progressTimer);
       if (upErr) {
         setUploading(false);
+        setUploadProgress(0);
         return toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
       }
+      setUploadProgress(100);
       file_path = path;
     }
     const { data, error } = await supabase.from("lab_results").insert({
@@ -227,16 +239,32 @@ const Dashboard = () => {
     if (error) return toast({ title: "Failed to add", description: error.message, variant: "destructive" });
     setLabs([data as LabResult, ...labs]);
     setLabOpen(false);
+    resetLabForm();
     toast({ title: "Lab result saved" });
   };
   const deleteLab = async (id: string, file_path: string | null) => {
     if (file_path) await supabase.storage.from("medical-files").remove([file_path]);
     await supabase.from("lab_results").delete().eq("id", id);
     setLabs(labs.filter(l => l.id !== id));
+    toast({ title: "Lab result deleted" });
   };
   const openLabFile = async (file_path: string) => {
-    const { data } = await supabase.storage.from("medical-files").createSignedUrl(file_path, 60);
-    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+    const { data, error } = await supabase.storage.from("medical-files").createSignedUrl(file_path, 60);
+    if (error || !data?.signedUrl) return toast({ title: "Could not open file", variant: "destructive" });
+    window.open(data.signedUrl, "_blank");
+  };
+  const downloadLabFile = async (file_path: string, title: string) => {
+    const { data, error } = await supabase.storage.from("medical-files").download(file_path);
+    if (error || !data) return toast({ title: "Download failed", description: error?.message, variant: "destructive" });
+    const url = URL.createObjectURL(data);
+    const a = document.createElement("a");
+    a.href = url;
+    const ext = file_path.split(".").pop() || "";
+    a.download = `${title}${ext ? "." + ext : ""}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   };
 
   const addConsult = async (e: React.FormEvent<HTMLFormElement>) => {
