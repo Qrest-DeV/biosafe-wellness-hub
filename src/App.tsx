@@ -15,6 +15,10 @@ import Services from "./pages/Services.tsx";
 import Aesthetics from "./pages/Aesthetics.tsx";
 import Cart from "./pages/Cart.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import AdminOverview from "./pages/admin/AdminOverview.tsx";
+import AdminProducts from "./pages/admin/AdminProducts.tsx";
+import AdminSlides from "./pages/admin/AdminSlides.tsx";
+import AdminCustomers from "./pages/admin/AdminCustomers.tsx";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +40,10 @@ const App = () => (
               <Route path="/cart" element={<Cart />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/admin" element={<AdminOverview />} />
+              <Route path="/admin/products" element={<AdminProducts />} />
+              <Route path="/admin/slides" element={<AdminSlides />} />
+              <Route path="/admin/customers" element={<AdminCustomers />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </CartProvider>
