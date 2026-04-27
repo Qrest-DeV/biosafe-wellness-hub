@@ -4,40 +4,34 @@ import { ArrowRight } from "lucide-react";
 import hero1 from "@/assets/hero-pharmacist.jpg";
 import hero2 from "@/assets/hero-skincare.jpg";
 import hero3 from "@/assets/hero-wellness.jpg";
+import { useHeroSlides } from "@/hooks/useHeroSlides";
+import { resolveImage } from "@/lib/assetResolver";
 
-const slides = [
-  {
-    image: hero1,
-    eyebrow: "Pharmacy · 24/7",
-    title: "More than prescriptions. Complete wellness.",
-    body: "Order medicines, talk to a pharmacist, and get same-day delivery across Lagos.",
-    cta: { label: "Shop pharmacy", to: "/shop?cat=drugs" },
-    tone: "peach",
-  },
-  {
-    image: hero2,
-    eyebrow: "Skincare for melanin-rich skin",
-    title: "A daily ritual, dermatologist-approved.",
-    body: "Curated routines with sunscreens, serums and creams formulated for you.",
-    cta: { label: "Shop skincare", to: "/shop?cat=skincare" },
-    tone: "mint",
-  },
-  {
-    image: hero3,
-    eyebrow: "BioLife Family",
-    title: "Healthcare and lifestyle, beautifully bundled.",
-    body: "Free delivery, juices, consultations and aesthetics — all in one subscription.",
-    cta: { label: "See plans", to: "/subscriptions" },
-    tone: "teal",
-  },
-];
+const fallbackImages = [hero1, hero2, hero3];
+const tones = ["peach", "mint", "teal"] as const;
 
 export const HeroCarousel = () => {
+  const { slides: dbSlides } = useHeroSlides(true);
   const [i, setI] = useState(0);
+
+  const slides = dbSlides.length
+    ? dbSlides.map((s, idx) => ({
+        image: resolveImage(s.image_url) || fallbackImages[idx % fallbackImages.length],
+        eyebrow: s.subtitle ?? "",
+        title: s.title,
+        body: s.subtitle ?? "",
+        cta: { label: s.cta_label ?? "Shop", to: s.cta_link ?? "/shop" },
+        tone: tones[idx % tones.length],
+      }))
+    : [];
+
   useEffect(() => {
+    if (slides.length < 2) return;
     const t = setInterval(() => setI((x) => (x + 1) % slides.length), 6000);
     return () => clearInterval(t);
-  }, []);
+  }, [slides.length]);
+
+  if (!slides.length) return null;
 
   return (
     <section className="relative overflow-hidden bg-base">
@@ -52,13 +46,17 @@ export const HeroCarousel = () => {
             >
               <div className="grid md:grid-cols-2 h-full min-h-[520px] md:min-h-[600px]">
                 <div className={`flex flex-col justify-center p-8 md:p-14 ${s.tone === "teal" ? "text-peach" : "text-teal"}`}>
-                  <span className="pill bg-background/60 text-teal w-fit">{s.eyebrow}</span>
+                  {s.eyebrow && (
+                    <span className="pill bg-background/60 text-teal w-fit">{s.eyebrow}</span>
+                  )}
                   <h1 className={`mt-5 text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05] max-w-xl ${s.tone === "teal" ? "text-peach" : "text-teal"}`}>
                     {s.title}
                   </h1>
-                  <p className={`mt-5 max-w-md text-base md:text-lg ${s.tone === "teal" ? "text-peach/80" : "text-teal/75"}`}>
-                    {s.body}
-                  </p>
+                  {s.body && (
+                    <p className={`mt-5 max-w-md text-base md:text-lg ${s.tone === "teal" ? "text-peach/80" : "text-teal/75"}`}>
+                      {s.body}
+                    </p>
+                  )}
                   <div className="mt-8 flex flex-wrap gap-3">
                     <Link
                       to={s.cta.to}
@@ -90,16 +88,18 @@ export const HeroCarousel = () => {
             </div>
           ))}
 
-          <div className="absolute bottom-5 left-8 md:left-14 z-10 flex gap-2">
-            {slides.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setI(idx)}
-                aria-label={`Slide ${idx + 1}`}
-                className={`h-1.5 rounded-full transition-all ${i === idx ? "w-10 bg-terracotta" : "w-5 bg-foreground/20"}`}
-              />
-            ))}
-          </div>
+          {slides.length > 1 && (
+            <div className="absolute bottom-5 left-8 md:left-14 z-10 flex gap-2">
+              {slides.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setI(idx)}
+                  aria-label={`Slide ${idx + 1}`}
+                  className={`h-1.5 rounded-full transition-all ${i === idx ? "w-10 bg-terracotta" : "w-5 bg-foreground/20"}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

@@ -47,6 +47,45 @@ export type Database = {
         }
         Relationships: []
       }
+      hero_slides: {
+        Row: {
+          active: boolean
+          created_at: string
+          cta_label: string | null
+          cta_link: string | null
+          id: string
+          image_url: string | null
+          sort_order: number
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          id?: string
+          image_url?: string | null
+          sort_order?: number
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          id?: string
+          image_url?: string | null
+          sort_order?: number
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lab_results: {
         Row: {
           created_at: string
@@ -119,6 +158,63 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          benefits: string[]
+          category: string
+          created_at: string
+          featured: boolean
+          how_to_use: string | null
+          id: string
+          image_url: string | null
+          in_stock: boolean
+          ingredients: string | null
+          long_description: string | null
+          name: string
+          price: number
+          short_description: string | null
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          benefits?: string[]
+          category: string
+          created_at?: string
+          featured?: boolean
+          how_to_use?: string | null
+          id?: string
+          image_url?: string | null
+          in_stock?: boolean
+          ingredients?: string | null
+          long_description?: string | null
+          name: string
+          price?: number
+          short_description?: string | null
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          benefits?: string[]
+          category?: string
+          created_at?: string
+          featured?: boolean
+          how_to_use?: string | null
+          id?: string
+          image_url?: string | null
+          in_stock?: boolean
+          ingredients?: string | null
+          long_description?: string | null
+          name?: string
+          price?: number
+          short_description?: string | null
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -179,14 +275,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "user"
       subscription_plan: "none" | "essential" | "family"
     }
     CompositeTypes: {
@@ -315,6 +439,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "user"],
       subscription_plan: ["none", "essential", "family"],
     },
   },

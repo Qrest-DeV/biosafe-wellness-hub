@@ -1,6 +1,7 @@
 import { Layout } from "@/components/Layout";
 import { ProductCard } from "@/components/ProductCard";
-import { categories, products } from "@/data/catalog";
+import { categories } from "@/data/catalog";
+import { useProducts, dbToProduct } from "@/hooks/useProducts";
 import { useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -9,6 +10,7 @@ const Shop = () => {
   const [params, setParams] = useSearchParams();
   const cat = params.get("cat") || "all";
   const [q, setQ] = useState("");
+  const { products } = useProducts();
 
   const filtered = useMemo(
     () =>
@@ -17,7 +19,7 @@ const Shop = () => {
           (cat === "all" || p.category === cat) &&
           (q === "" || p.name.toLowerCase().includes(q.toLowerCase()))
       ),
-    [cat, q]
+    [cat, q, products]
   );
 
   return (
@@ -59,7 +61,7 @@ const Shop = () => {
 
         <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {filtered.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard key={p.id} product={dbToProduct(p)} />
           ))}
         </div>
         {filtered.length === 0 && (

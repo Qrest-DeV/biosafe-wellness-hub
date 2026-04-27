@@ -1,8 +1,9 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Search, ShoppingBag, Menu, X, User } from "lucide-react";
+import { Search, ShoppingBag, Menu, X, User, Shield } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useAdmin } from "@/hooks/useAdmin";
 import { Wordmark } from "./Wordmark";
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +18,7 @@ const links = [
 export const Header = () => {
   const { count } = useCart();
   const { user } = useAuth();
+  const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const loc = useLocation();
@@ -42,6 +44,16 @@ export const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2">
+          {isAdmin && (
+            <button
+              onClick={() => navigate("/admin")}
+              aria-label="Admin"
+              title="Admin panel"
+              className="hidden sm:inline-flex items-center gap-1.5 h-9 rounded-full bg-teal text-peach hover:bg-teal-soft px-3 text-xs font-medium transition"
+            >
+              <Shield className="h-3.5 w-3.5" /> Admin
+            </button>
+          )}
           <button aria-label="Search" className="hidden sm:flex h-10 w-10 items-center justify-center rounded-full hover:bg-peach text-teal transition">
             <Search className="h-[18px] w-[18px]" />
           </button>
