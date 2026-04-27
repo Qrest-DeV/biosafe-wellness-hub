@@ -1,6 +1,7 @@
 import { Layout } from "@/components/Layout";
 import { ProductCard } from "@/components/ProductCard";
-import { products, categories } from "@/data/catalog";
+import { categories } from "@/data/catalog";
+import { useProducts, dbToProduct } from "@/hooks/useProducts";
 import { formatNaira, useCart } from "@/context/CartContext";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
@@ -11,15 +12,20 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { add } = useCart();
   const [qty, setQty] = useState(1);
+  const { products: dbProducts } = useProducts();
+  const products = useMemo(() => dbProducts.map(dbToProduct), [dbProducts]);
 
-  const product = useMemo(() => products.find((p) => p.id === id), [id]);
+  const product = useMemo(
+    () => products.find((p) => p.id === id || (p as any).slug === id),
+    [id, products]
+  );
 
   const related = useMemo(() => {
     if (!product) return [];
     const sameCat = products.filter((p) => p.category === product.category && p.id !== product.id);
     const others = products.filter((p) => p.category !== product.category && p.id !== product.id);
     return [...sameCat, ...others].slice(0, 4);
-  }, [product]);
+  }, [product, products]);
 
   if (!product) {
     return (
