@@ -1,8 +1,9 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Search, ShoppingBag, Menu, X, User } from "lucide-react";
+import { Search, ShoppingBag, Menu, X, User, Shield } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useAdmin } from "@/hooks/useAdmin";
 import { Wordmark } from "./Wordmark";
 import { Button } from "@/components/ui/button";
 
