@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, ShieldCheck, ChevronRight } from "lucide-react";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Search, ShieldCheck, ChevronRight, X, Filter } from "lucide-react";
 
 type Profile = {
   id: string;
@@ -14,6 +17,7 @@ type Profile = {
   full_name: string | null;
   username: string | null;
   phone: string | null;
+  email: string | null;
   blood_type: string | null;
   age: number | null;
   weight_kg: number | null;
@@ -25,16 +29,26 @@ type Profile = {
   created_at: string;
 };
 
+type PlanFilter = "all" | "none" | "essential" | "plus" | "pro";
+type VerifiedFilter = "all" | "verified" | "unverified";
+
 const AdminCustomers = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const [plan, setPlan] = useState<PlanFilter>("all");
+  const [verified, setVerified] = useState<VerifiedFilter>("all");
   const [selected, setSelected] = useState<Profile | null>(null);
   const [counts, setCounts] = useState<{ rx: number; labs: number; consults: number } | null>(null);
 
   useEffect(() => {
-    supabase.from("profiles").select("*").order("created_at", { ascending: false }).then(({ data }) => {
-      setProfiles((data as Profile[]) ?? []);
-    });
+    const load = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.rpc("admin_list_profiles_with_email");
+      if (!error) setProfiles((data as Profile[]) ?? []);
+      setLoading(false);
+    };
+    load();
   }, []);
 
   useEffect(() => {
@@ -50,21 +64,85 @@ const AdminCustomers = () => {
     load();
   }, [selected]);
 
-  const filtered = profiles.filter((p) =>
-    !q ||
-    (p.full_name ?? "").toLowerCase().includes(q.toLowerCase()) ||
-    (p.username ?? "").toLowerCase().includes(q.toLowerCase()) ||
-    (p.phone ?? "").includes(q)
-  );
+  const filtered = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return profiles.filter((p) => {
+      if (plan !== "all" && p.subscription_plan !== plan) return false;
+      if (verified === "verified" && !p.verified_patient) return false;
+      if (verified === "unverified" && p.verified_patient) return false;
+      if (!term) return true;
+      return (
+        (p.full_name ?? "").toLowerCase().includes(term) ||
+        (p.username ?? "").toLowerCase().includes(term) ||
+        (p.phone ?? "").toLowerCase().includes(term) ||
+        (p.email ?? "").toLowerCase().includes(term)
+      );
+    });
+  }, [profiles, q, plan, verified]);
+
+  const activeFilterCount = (plan !== "all" ? 1 : 0) + (verified !== "all" ? 1 : 0);
+  const clearAll = () => { setQ(""); setPlan("all"); setVerified("all"); };
 
   return (
     <AdminLayout>
       <h1 className="text-3xl text-teal mb-2">Customers</h1>
-      <p className="text-teal/70 mb-6">View customer profiles. Health details stay private — only summary visible.</p>
+      <p className="text-teal/70 mb-6">Search by name, username, phone, or email. Health details stay private — only summary visible.</p>
 
-      <div className="card-soft flex items-center gap-2 px-4 py-2 mb-6 max-w-md">
-        <Search className="h-4 w-4 text-teal/60" />
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, username, phone…" className="border-0 focus-visible:ring-0 px-0" />
+      <div className="flex flex-col md:flex-row gap-3 mb-6">
+        <div className="card-soft flex items-center gap-2 px-4 py-2 flex-1 min-w-0">
+          <Search className="h-4 w-4 text-teal/60 shrink-0" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search name, username, phone, or email…"
+            className="border-0 focus-visible:ring-0 px-0 bg-transparent"
+          />
+          {q && (
+            <button onClick={() => setQ("")} className="text-teal/50 hover:text-teal" aria-label="Clear search">
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          <Select value={plan} onValueChange={(v) => setPlan(v as PlanFilter)}>
+            <SelectTrigger className="w-[140px] bg-card">
+              <SelectValue placeholder="Plan" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All plans</SelectItem>
+              <SelectItem value="none">No plan</SelectItem>
+              <SelectItem value="essential">Essential</SelectItem>
+              <SelectItem value="plus">Plus</SelectItem>
+              <SelectItem value="pro">Pro</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={verified} onValueChange={(v) => setVerified(v as VerifiedFilter)}>
+            <SelectTrigger className="w-[150px] bg-card">
+              <SelectValue placeholder="Verified" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All patients</SelectItem>
+              <SelectItem value="verified">Verified only</SelectItem>
+              <SelectItem value="unverified">Unverified</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {(activeFilterCount > 0 || q) && (
+            <Button variant="ghost" size="sm" onClick={clearAll} className="text-teal/70">
+              Clear
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 text-xs text-teal/60 mb-3">
+        <Filter className="h-3 w-3" />
+        <span>
+          {loading ? "Loading…" : `${filtered.length} of ${profiles.length} customer${profiles.length === 1 ? "" : "s"}`}
+          {activeFilterCount > 0 && ` · ${activeFilterCount} filter${activeFilterCount === 1 ? "" : "s"} applied`}
+        </span>
       </div>
 
       <div className="card-soft overflow-hidden">
@@ -72,6 +150,7 @@ const AdminCustomers = () => {
           <thead className="bg-peach text-teal">
             <tr>
               <th className="text-left px-4 py-3">Customer</th>
+              <th className="text-left px-4 py-3 hidden lg:table-cell">Email</th>
               <th className="text-left px-4 py-3 hidden md:table-cell">Phone</th>
               <th className="text-left px-4 py-3 hidden sm:table-cell">Plan</th>
               <th className="text-left px-4 py-3 hidden md:table-cell">Joined</th>
@@ -84,10 +163,11 @@ const AdminCustomers = () => {
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     <div className="font-medium text-teal">{p.full_name || p.username || "Unnamed"}</div>
-                    {p.verified_patient && <ShieldCheck className="h-4 w-4 text-mint-foreground text-teal" />}
+                    {p.verified_patient && <ShieldCheck className="h-4 w-4 text-teal" />}
                   </div>
                   <div className="text-xs text-muted-foreground">@{p.username ?? "—"}</div>
                 </td>
+                <td className="px-4 py-3 hidden lg:table-cell text-teal/80 truncate max-w-[220px]">{p.email ?? "—"}</td>
                 <td className="px-4 py-3 hidden md:table-cell text-teal/80">{p.phone ?? "—"}</td>
                 <td className="px-4 py-3 hidden sm:table-cell">
                   <span className="pill bg-mint text-teal text-[10px] capitalize">{p.subscription_plan}</span>
@@ -96,8 +176,8 @@ const AdminCustomers = () => {
                 <td className="px-4 py-3 text-right"><ChevronRight className="h-4 w-4 text-teal/50 inline" /></td>
               </tr>
             ))}
-            {filtered.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No customers found.</td></tr>
+            {!loading && filtered.length === 0 && (
+              <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No customers match your filters.</td></tr>
             )}
           </tbody>
         </table>
@@ -117,6 +197,7 @@ const AdminCustomers = () => {
                 <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Profile</h3>
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                   <dt className="text-teal/60">Username</dt><dd className="text-teal">@{selected.username ?? "—"}</dd>
+                  <dt className="text-teal/60">Email</dt><dd className="text-teal break-all">{selected.email ?? "—"}</dd>
                   <dt className="text-teal/60">Phone</dt><dd className="text-teal">{selected.phone ?? "—"}</dd>
                   <dt className="text-teal/60">Plan</dt><dd className="text-teal capitalize">{selected.subscription_plan}</dd>
                   <dt className="text-teal/60">Joined</dt><dd className="text-teal">{new Date(selected.created_at).toLocaleDateString()}</dd>
