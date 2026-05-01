@@ -301,6 +301,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_profiles_with_email: {
+        Args: never
+        Returns: {
+          age: number
+          allergies: string[]
+          blood_type: string
+          chronic_conditions: string[]
+          created_at: string
+          email: string
+          full_name: string
+          height_cm: number
+          id: string
+          phone: string
+          subscription_plan: string
+          user_id: string
+          username: string
+          verified_patient: boolean
+          weight_kg: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
