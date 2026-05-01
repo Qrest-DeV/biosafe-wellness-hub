@@ -118,17 +118,47 @@ const Dashboard = () => {
     if (!user) return;
     (async () => {
       setLoading(true);
-      const [p, r, l, c] = await Promise.all([
-        supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("prescriptions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("lab_results").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("consultations").select("*").eq("user_id", user.id).order("consultation_date", { ascending: false }),
-      ]);
-      if (p.data) setProfile(p.data as Profile);
-      if (r.data) setRx(r.data as Prescription[]);
-      if (l.data) setLabs(l.data as LabResult[]);
-      if (c.data) setConsults(c.data as Consultation[]);
-      setLoading(false);
+      try {
+        const [p, r, l, c] = await Promise.all([
+          supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
+          supabase.from("prescriptions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+          supabase.from("lab_results").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+          supabase.from("consultations").select("*").eq("user_id", user.id).order("consultation_date", { ascending: false }),
+        ]);
+
+        let profileRow = p.data as Profile | null;
+        if (p.error) console.error("[dashboard] profile fetch error:", p.error);
+
+        // Auto-create profile if missing (e.g. user created before trigger existed)
+        if (!profileRow && !p.error) {
+          const fallbackUsername = user.email?.split("@")[0] ?? null;
+          const { data: created, error: createErr } = await supabase
+            .from("profiles")
+            .insert({
+              user_id: user.id,
+              full_name: (user.user_metadata?.full_name as string) ?? "",
+              username: (user.user_metadata?.username as string) ?? fallbackUsername,
+            })
+            .select()
+            .single();
+          if (createErr) {
+            console.error("[dashboard] profile auto-create failed:", createErr);
+            toast({ title: "Couldn't load your profile", description: createErr.message, variant: "destructive" });
+          } else {
+            profileRow = created as Profile;
+          }
+        }
+
+        if (profileRow) setProfile(profileRow);
+        if (r.data) setRx(r.data as Prescription[]);
+        if (l.data) setLabs(l.data as LabResult[]);
+        if (c.data) setConsults(c.data as Consultation[]);
+      } catch (err) {
+        console.error("[dashboard] unexpected load error:", err);
+        toast({ title: "Failed to load dashboard", description: String(err), variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [user]);
 
@@ -284,11 +314,27 @@ const Dashboard = () => {
     toast({ title: "Consultation logged" });
   };
 
-  if (authLoading || loading || !profile) {
+  if (authLoading || loading) {
     return (
       <Layout>
         <div className="container-x py-24 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-teal" />
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <Layout>
+        <div className="container-x py-24 max-w-md mx-auto text-center space-y-4">
+          <AlertCircle className="h-10 w-10 text-terracotta mx-auto" />
+          <h2 className="text-2xl text-teal">We couldn't load your profile</h2>
+          <p className="text-teal/70">Please try refreshing the page. If the issue persists, sign out and back in.</p>
+          <div className="flex gap-2 justify-center">
+            <Button onClick={() => window.location.reload()} className="rounded-full">Refresh</Button>
+            <Button variant="outline" onClick={async () => { await signOut(); navigate("/auth"); }} className="rounded-full">Sign out</Button>
+          </div>
         </div>
       </Layout>
     );
