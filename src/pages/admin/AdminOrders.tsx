@@ -93,9 +93,9 @@ const AdminOrders = () => {
     });
   }, [orders, q, status]);
 
-  const updateOrder = async (patch: Partial<Order>) => {
+  const updateOrder = async (patch: Record<string, unknown>) => {
     if (!selected) return;
-    const { error, data } = await supabase.from("orders").update(patch).eq("id", selected.id).select().single();
+    const { error, data } = await supabase.from("orders").update(patch as never).eq("id", selected.id).select().single();
     if (error) return toast.error(error.message);
     await logAudit("update", "order", selected.id, selected, patch);
     toast.success("Order updated");
