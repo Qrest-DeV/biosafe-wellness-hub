@@ -3,7 +3,7 @@ import { Search, ShoppingBag, Menu, X, User, Shield } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { useAdmin } from "@/hooks/useAdmin";
+import { useRole } from "@/hooks/useRole";
 import { Wordmark } from "./Wordmark";
 import { Button } from "@/components/ui/button";
 
@@ -18,7 +18,7 @@ const links = [
 export const Header = () => {
   const { count } = useCart();
   const { user } = useAuth();
-  const { isAdmin } = useAdmin();
+  const { hasAdminAccess: isAdmin } = useRole();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const loc = useLocation();
