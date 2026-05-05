@@ -593,6 +593,9 @@ const Dashboard = () => {
           </Tabs>
         </div>
       </section>
+          </div>
+        </div>
+      </SidebarProvider>
 
       {/* Edit profile dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
