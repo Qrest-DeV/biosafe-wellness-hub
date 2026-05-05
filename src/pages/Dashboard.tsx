@@ -356,14 +356,19 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <section className="container-x py-8 md:py-12 max-w-6xl">
+      <SidebarProvider>
+        <div className="flex w-full min-h-[calc(100vh-5rem)]">
+          <DashboardSidebar active={activeSection} onSelect={setActiveSection} />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 border-b border-border/60 h-12 px-4 sticky top-0 bg-base/95 backdrop-blur z-10">
+              <SidebarTrigger />
+              <span className="text-sm font-medium text-teal capitalize">{activeSection}</span>
+            </div>
+            <section className="container-x py-6 md:py-8 max-w-6xl">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <Button asChild variant="ghost" className="text-teal hover:bg-peach gap-2 -ml-3">
-            <Link to="/"><ArrowLeft className="h-4 w-4" /> Back to dashboard</Link>
-          </Button>
-          <Button onClick={async () => { await signOut(); navigate("/"); }} variant="outline" className="rounded-full gap-2">
-            <LogOut className="h-4 w-4" /> Sign out
+            <Link to="/"><ArrowLeft className="h-4 w-4" /> Back to home</Link>
           </Button>
         </div>
 
