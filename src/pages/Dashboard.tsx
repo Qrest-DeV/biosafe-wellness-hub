@@ -81,6 +81,7 @@ const Dashboard = () => {
   const [consults, setConsults] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("overview");
   const [rxOpen, setRxOpen] = useState(false);
   const [labOpen, setLabOpen] = useState(false);
   const [consultOpen, setConsultOpen] = useState(false);
