@@ -64,6 +64,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Auth gating disabled — freely accessible
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-base text-teal">
@@ -71,8 +72,6 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
       </div>
     );
   }
-  if (!user) return <Navigate to="/auth" replace />;
-  if (!hasAdminAccess) return <Navigate to="/" replace />;
 
   const SidebarContents = () => (
     <>
