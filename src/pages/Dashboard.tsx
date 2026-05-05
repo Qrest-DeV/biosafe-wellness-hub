@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -79,6 +81,7 @@ const Dashboard = () => {
   const [consults, setConsults] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("overview");
   const [rxOpen, setRxOpen] = useState(false);
   const [labOpen, setLabOpen] = useState(false);
   const [consultOpen, setConsultOpen] = useState(false);
@@ -110,12 +113,20 @@ const Dashboard = () => {
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  useEffect(() => {
-    if (!authLoading && !user) navigate("/auth", { replace: true });
-  }, [user, authLoading, navigate]);
+  // Auth check disabled — dashboard is freely accessible
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      // Mock profile for browsing without login
+      setProfile({
+        id: "demo", user_id: "demo", username: "demo", full_name: "Demo User",
+        phone: null, verified_patient: false, blood_type: null, age: null,
+        weight_kg: null, height_cm: null, allergies: [], chronic_conditions: [],
+        subscription_plan: "none", subscription_started_at: null,
+      });
+      setLoading(false);
+      return;
+    }
     (async () => {
       setLoading(true);
       try {
@@ -129,7 +140,6 @@ const Dashboard = () => {
         let profileRow = p.data as Profile | null;
         if (p.error) console.error("[dashboard] profile fetch error:", p.error);
 
-        // Auto-create profile if missing (e.g. user created before trigger existed)
         if (!profileRow && !p.error) {
           const fallbackUsername = user.email?.split("@")[0] ?? null;
           const { data: created, error: createErr } = await supabase
@@ -347,14 +357,19 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <section className="container-x py-8 md:py-12 max-w-6xl">
+      <SidebarProvider>
+        <div className="flex w-full min-h-[calc(100vh-5rem)]">
+          <DashboardSidebar active={activeSection} onSelect={setActiveSection} />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 border-b border-border/60 h-12 px-4 sticky top-0 bg-base/95 backdrop-blur z-10">
+              <SidebarTrigger />
+              <span className="text-sm font-medium text-teal capitalize">{activeSection}</span>
+            </div>
+            <section className="container-x py-6 md:py-8 max-w-6xl">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <Button asChild variant="ghost" className="text-teal hover:bg-peach gap-2 -ml-3">
-            <Link to="/"><ArrowLeft className="h-4 w-4" /> Back to dashboard</Link>
-          </Button>
-          <Button onClick={async () => { await signOut(); navigate("/"); }} variant="outline" className="rounded-full gap-2">
-            <LogOut className="h-4 w-4" /> Sign out
+            <Link to="/"><ArrowLeft className="h-4 w-4" /> Back to home</Link>
           </Button>
         </div>
 
@@ -579,6 +594,9 @@ const Dashboard = () => {
           </Tabs>
         </div>
       </section>
+          </div>
+        </div>
+      </SidebarProvider>
 
       {/* Edit profile dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
