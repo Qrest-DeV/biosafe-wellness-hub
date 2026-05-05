@@ -81,7 +81,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
       </div>
       <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
         {navGroups.map((g, gi) => {
-          const visible = g.items.filter((i) => can(i.section));
+          const visible = g.items; // gating disabled
           if (!visible.length) return null;
           return (
             <div key={gi}>
