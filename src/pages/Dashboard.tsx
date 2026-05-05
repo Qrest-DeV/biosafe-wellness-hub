@@ -112,12 +112,20 @@ const Dashboard = () => {
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  useEffect(() => {
-    if (!authLoading && !user) navigate("/auth", { replace: true });
-  }, [user, authLoading, navigate]);
+  // Auth check disabled — dashboard is freely accessible
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      // Mock profile for browsing without login
+      setProfile({
+        id: "demo", user_id: "demo", username: "demo", full_name: "Demo User",
+        phone: null, verified_patient: false, blood_type: null, age: null,
+        weight_kg: null, height_cm: null, allergies: [], chronic_conditions: [],
+        subscription_plan: "none", subscription_started_at: null,
+      });
+      setLoading(false);
+      return;
+    }
     (async () => {
       setLoading(true);
       try {
@@ -131,7 +139,6 @@ const Dashboard = () => {
         let profileRow = p.data as Profile | null;
         if (p.error) console.error("[dashboard] profile fetch error:", p.error);
 
-        // Auto-create profile if missing (e.g. user created before trigger existed)
         if (!profileRow && !p.error) {
           const fallbackUsername = user.email?.split("@")[0] ?? null;
           const { data: created, error: createErr } = await supabase
