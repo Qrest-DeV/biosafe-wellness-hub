@@ -56,8 +56,8 @@ export const Header = () => {
             <Search className="h-[18px] w-[18px]" />
           </button>
           <button
-            onClick={() => navigate(user ? "/dashboard" : "/auth")}
-            aria-label={user ? "Account" : "Sign in"}
+            onClick={() => navigate("/dashboard")}
+            aria-label="Account"
             className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-peach text-teal transition"
           >
             <User className="h-[18px] w-[18px]" />

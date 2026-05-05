@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import Index from "./pages/Index.tsx";
-import Auth from "./pages/Auth.tsx";
+
 import Dashboard from "./pages/Dashboard.tsx";
 import Shop from "./pages/Shop.tsx";
 import ProductDetail from "./pages/ProductDetail.tsx";
@@ -52,7 +52,7 @@ const App = () => (
               <Route path="/services" element={<Services />} />
               <Route path="/aesthetics" element={<Aesthetics />} />
               <Route path="/cart" element={<Cart />} />
-              <Route path="/auth" element={<Auth />} />
+              
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/admin" element={<AdminOverview />} />
               <Route path="/admin/products" element={<AdminProducts />} />

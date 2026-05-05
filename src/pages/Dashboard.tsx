@@ -343,7 +343,7 @@ const Dashboard = () => {
           <p className="text-teal/70">Please try refreshing the page. If the issue persists, sign out and back in.</p>
           <div className="flex gap-2 justify-center">
             <Button onClick={() => window.location.reload()} className="rounded-full">Refresh</Button>
-            <Button variant="outline" onClick={async () => { await signOut(); navigate("/auth"); }} className="rounded-full">Sign out</Button>
+            <Button variant="outline" onClick={() => window.location.reload()} className="rounded-full">Retry</Button>
           </div>
         </div>
       </Layout>
