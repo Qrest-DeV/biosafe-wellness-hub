@@ -236,6 +236,72 @@ export type Database = {
         }
         Relationships: []
       }
+      family_members: {
+        Row: {
+          blood_type: string | null
+          created_at: string
+          dob: string | null
+          full_name: string
+          gender: string | null
+          id: string
+          relationship: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          blood_type?: string | null
+          created_at?: string
+          dob?: string | null
+          full_name: string
+          gender?: string | null
+          id?: string
+          relationship: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          blood_type?: string | null
+          created_at?: string
+          dob?: string | null
+          full_name?: string
+          gender?: string | null
+          id?: string
+          relationship?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      health_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          metric_type: string
+          recorded_at: string
+          unit: string | null
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_type: string
+          recorded_at?: string
+          unit?: string | null
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_type?: string
+          recorded_at?: string
+          unit?: string | null
+          user_id?: string
+          value?: number
+        }
+        Relationships: []
+      }
       hero_slides: {
         Row: {
           active: boolean
@@ -304,6 +370,33 @@ export type Database = {
           result_date?: string | null
           title?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_staff: boolean
+          sender_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_staff?: boolean
+          sender_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_staff?: boolean
+          sender_id?: string
           user_id?: string
         }
         Relationships: []
